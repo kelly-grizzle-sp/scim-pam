@@ -1,7 +1,19 @@
 swagger: '2.0'
 info:
   title: PAM SCIM Extension
-  description: Privileged Account Management SCIM API extensions that promote integration with identity governance systems.
+  description: |
+    Privileged Account Management SCIM API extensions that promote integration with identity governance systems.
+    
+    The idea behind this API is to provide a common base for all PAM vendors to build on top of.  This API exposes the objects that are core to privileged account management, but can be extended by vendors that can provide additional information.  In the same way, some vendors may not support all of the endpoints or data that is described in this API.  When this is encountered, the PAM vendor can safely treat endpoints or data as optional.
+    
+    At a high-level, this API exposes the following concepts
+    
+     * User - A PAM user that is using the PAM system to manage or access privileged data.  This user can either exist only in the PAM system or can be an external user that is defined in another system (eg - Active Directory or LDAP).
+     * Group - A group in the PAM system that can be used to govern access within the PAM system.  This group can either exist only in the PAM system or can be an external group that is defined in another system (eg - Active Directory or LDAP).
+     * Container - A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control lists (ACLs) can be applied to a container to control which users and groups have permissions to the privileged data in the container.
+     * Privileged Data - Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control lists (ACLs) can be applied to privileged data to control which users and groups have permissions to the privileged data.  More often, the ACL information is inherited from the container.
+     * Access Control Lists (ACLs) - An access control list can be associated with a Container or Privileged Data.  This contains information about which users and groups have access to the Container/Data, and what rights they have.
+
   version: "1.0.0"
 # the domain of the service
 host: scim.example.com
@@ -11,7 +23,32 @@ schemes:
 # will be prefixed to all paths
 basePath: /v2
 produces:
-  - application/json
+  - application/scim+json
+consumes:
+  - application/scim+json
+
+parameters:
+  startIndex:
+    name: startIndex
+    in: query
+    description: The 1-based index of the first query result
+    required: false
+    type: number
+    format: integer
+  count:
+    name: count
+    in: query
+    description: The maximum number of results to return
+    required: false
+    type: number
+    format: integer
+  filter:
+    name: filter
+    in: query
+    description: 'A SCIM filter string - see https://tools.ietf.org/html/rfc7644#section-3.4.2.2'
+    required: false
+    type: string
+
 paths:
   /Users:
     get:
@@ -19,18 +56,9 @@ paths:
       description: |
         The Users endpoint returns information about users in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
       parameters:
-        - name: startIndex
-          in: query
-          description: The 1-based index of the first query result
-          required: false
-          type: number
-          format: integer
-        - name: count
-          in: query
-          description: The maximum number of results to return
-          required: false
-          type: number
-          format: integer
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
       tags:
         - Users
       responses:
@@ -73,18 +101,9 @@ paths:
       description: |
         The Groups endpoint returns information about groups in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
       parameters:
-        - name: startIndex
-          in: query
-          description: The 1-based index of the first query result
-          required: false
-          type: number
-          format: integer
-        - name: count
-          in: query
-          description: The maximum number of results to return
-          required: false
-          type: number
-          format: integer
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
       tags:
         - Groups
       responses:
@@ -127,18 +146,9 @@ paths:
       description: |
         This endpoint returns information about the containers defined in the PAM system.  A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control list (ACL) information about which users and groups have permissions on a Container can be obtained through /ContainerPermissions.
       parameters:
-        - name: startIndex
-          in: query
-          description: The 1-based index of the first query result
-          required: false
-          type: number
-          format: integer
-        - name: count
-          in: query
-          description: The maximum number of results to return
-          required: false
-          type: number
-          format: integer
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
       tags:
         - Containers
       responses:
@@ -181,18 +191,9 @@ paths:
       description: |
         This endpoint returns information about the privileged data defined in the PAM system.  Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control list (ACL) information about which users and groups have permissions on a piece of PrivilegedData can be obtained through /PrivilegedDataPermissions.
       parameters:
-        - name: startIndex
-          in: query
-          description: The 1-based index of the first query result
-          required: false
-          type: number
-          format: integer
-        - name: count
-          in: query
-          description: The maximum number of results to return
-          required: false
-          type: number
-          format: integer
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
       tags:
         - Privileged Data
       responses:
@@ -218,7 +219,7 @@ paths:
           type: number
           format: integer
       tags:
-        - Containers
+        - Privileged Data
       responses:
         200:
           description: The requested PrivilegedData.
@@ -256,7 +257,7 @@ definitions:
       userName:
         type: string
         description: TODO
-      'urn:new:thing':
+      'urn:ietf:params:scim:schemas:pam:1.0:LinkedObject':
         type: object
         properties:
           source:
@@ -292,7 +293,7 @@ definitions:
       name:
         type: string
         description: TODO
-      'urn:new:thing':
+      'urn:ietf:params:scim:schemas:pam:1.0:LinkedObject':
         type: object
         properties:
           source:
