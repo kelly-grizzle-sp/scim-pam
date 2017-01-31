@@ -1,0 +1,408 @@
+swagger: '2.0'
+info:
+  title: PAM SCIM Extension
+  description: Privileged Account Management SCIM API extensions that promote integration with identity governance systems.
+  version: "1.0.0"
+# the domain of the service
+host: scim.example.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v2
+produces:
+  - application/json
+paths:
+  /Users:
+    get:
+      summary: List or query users.
+      description: |
+        The Users endpoint returns information about users in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+      parameters:
+        - name: startIndex
+          in: query
+          description: The 1-based index of the first query result
+          required: false
+          type: number
+          format: integer
+        - name: count
+          in: query
+          description: The maximum number of results to return
+          required: false
+          type: number
+          format: integer
+      tags:
+        - Users
+      responses:
+        200:
+          description: A ListResponse with the requested users.
+          schema:
+            $ref: '#/definitions/ListResponseOfUsers'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /Users/{userId}:
+    get:
+      summary: Retrieve a user.
+      description: |
+        This endpoint returns information about a requested user in the PAM system.  This user may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Users
+      responses:
+        200:
+          description: The requested User.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /Groups:
+    get:
+      summary: List or query groups.
+      description: |
+        The Groups endpoint returns information about groups in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+      parameters:
+        - name: startIndex
+          in: query
+          description: The 1-based index of the first query result
+          required: false
+          type: number
+          format: integer
+        - name: count
+          in: query
+          description: The maximum number of results to return
+          required: false
+          type: number
+          format: integer
+      tags:
+        - Groups
+      responses:
+        200:
+          description: A ListResponse with the requested groups.
+          schema:
+            $ref: '#/definitions/ListResponseOfGroups'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /Groups/{groupId}:
+    get:
+      summary: Retrieve a group.
+      description: |
+        This endpoint returns information about a requested group in the PAM system.  This group may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+      parameters:
+        - name: groupId
+          in: path
+          description: The ID of the group to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Groups
+      responses:
+        200:
+          description: The requested Group.
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /Containers:
+    get:
+      summary: Retrieve a list response of containers.
+      description: |
+        This endpoint returns information about the containers defined in the PAM system.  A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control list (ACL) information about which users and groups have permissions on a Container can be obtained through /ContainerPermissions.
+      parameters:
+        - name: startIndex
+          in: query
+          description: The 1-based index of the first query result
+          required: false
+          type: number
+          format: integer
+        - name: count
+          in: query
+          description: The maximum number of results to return
+          required: false
+          type: number
+          format: integer
+      tags:
+        - Containers
+      responses:
+        200:
+          description: A ListResponse with the requested containers.
+          schema:
+            $ref: '#/definitions/ListResponseOfContainers'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /Container/{containerId}:
+    get:
+      summary: Retrieve a container.
+      description: |
+        This endpoint returns information about a requested Container.  A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control list (ACL) information about which users and groups have permissions on a Container can be obtained through /ContainerPermissions.
+      parameters:
+        - name: containerId
+          in: path
+          description: The ID of the container to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Containers
+      responses:
+        200:
+          description: The requested Container.
+          schema:
+            $ref: '#/definitions/Container'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /PrivilegedData:
+    get:
+      summary: Retrieve a list response of privileged data.
+      description: |
+        This endpoint returns information about the privileged data defined in the PAM system.  Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control list (ACL) information about which users and groups have permissions on a piece of PrivilegedData can be obtained through /PrivilegedDataPermissions.
+      parameters:
+        - name: startIndex
+          in: query
+          description: The 1-based index of the first query result
+          required: false
+          type: number
+          format: integer
+        - name: count
+          in: query
+          description: The maximum number of results to return
+          required: false
+          type: number
+          format: integer
+      tags:
+        - Privileged Data
+      responses:
+        200:
+          description: A ListResponse with the requested privileged data.
+          schema:
+            $ref: '#/definitions/ListResponseOfPrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /PrivilegedData/{privilegedDataId}:
+    get:
+      summary: Retrieve a single PrivilegedData.
+      description: |
+        This endpoint returns information about a requested piece of PrivilegedData.  Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control list (ACL) information about which users and groups have permissions on a piece of PrivilegedData can be obtained through /PrivilegedDataPermissions.
+      parameters:
+        - name: privilegedDataId
+          in: path
+          description: The ID of the PrivilegedData to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Containers
+      responses:
+        200:
+          description: The requested PrivilegedData.
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  ListResponseOfUsers:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/User'
+
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        description: TODO
+      userName:
+        type: string
+        description: TODO
+      'urn:new:thing':
+        type: object
+        properties:
+          source:
+            type: string
+            description: The name of the external application on which this user lives.  If this is a PAM local user, this is null.
+          nativeIdentifier:
+            type: string
+            description: The native identifier of the user on the external application (eg - the LDAP DN).  If this is a PAM local user, this is null.
+
+  ListResponseOfGroups:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/Group'
+
+  Group:
+    type: object
+    properties:
+      id:
+        type: string
+        description: TODO
+      name:
+        type: string
+        description: TODO
+      'urn:new:thing':
+        type: object
+        properties:
+          source:
+            type: string
+            description: The name of the external application on which this group lives.  If this is a PAM local group, this is null.
+          nativeIdentifier:
+            type: string
+            description: The native identifier of the group on the external application (eg - the LDAP DN).  If this is a PAM local group, this is null.
+
+  ListResponseOfContainers:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/Container'
+
+  Container:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the container.
+      name:
+        type: string
+        description: The name of the container.
+      displayName:
+        type: string
+        description: The display name of the container.  This is optional.  If null, the name will be used as the display name.
+      description:
+        type: string
+        description: The description of the container.
+      type:
+        type: string
+        description: The type of container (eg - management set or account store).  This is optional if the PAM system does not support multiple types of containers.
+      owner:
+        type: object
+        description: The user that owns this container. TODO ... Can this be a group?  TODO ... can there be multiple??
+        properties:
+          value:
+            type: string
+            description: The ID of the user that owns this container
+          '$ref':
+            type: string
+            description: A URI reference to the user that owns this container.
+      privilegedData:
+        type: array
+        description: The privileged data that resides in this container.
+        items:
+          $ref: '#/definitions/PrivilegedDataReference'
+
+  PrivilegedDataReference:
+    type: object
+    properties:
+      value:
+        type: string
+        description: The ID of the privileged data.
+      '$ref':
+        type: string
+        description: A URI reference to the PrivilegedData.
+
+  ListResponseOfPrivilegedData:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/PrivilegedData'
+
+  PrivilegedData:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the PrivilegedData.
+      name:
+        type: string
+        description: A descriptive name for this piece of PrivilegedData.  For example, root@mylinuxhost
+      description:
+        type: string
+        description: A description for this piece of PrivilegedData.
+      type:
+        type: string
+        description: The type of PrivilegedData.  The value will be dependent on what is supported by the PAM system.  Examples include 'credential', 'ssh key', 'file', etc...
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
