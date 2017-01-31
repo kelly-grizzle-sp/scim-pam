@@ -142,7 +142,7 @@ paths:
 
   /Containers:
     get:
-      summary: Retrieve a list response of containers.
+      summary: List or query containers.
       description: |
         This endpoint returns information about the containers defined in the PAM system.  A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control list (ACL) information about which users and groups have permissions on a Container can be obtained through /ContainerPermissions.
       parameters:
@@ -187,7 +187,7 @@ paths:
 
   /PrivilegedData:
     get:
-      summary: Retrieve a list response of privileged data.
+      summary: List or query privileged data.
       description: |
         This endpoint returns information about the privileged data defined in the PAM system.  Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control list (ACL) information about which users and groups have permissions on a piece of PrivilegedData can be obtained through /PrivilegedDataPermissions.
       parameters:
@@ -225,6 +225,96 @@ paths:
           description: The requested PrivilegedData.
           schema:
             $ref: '#/definitions/PrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /ContainerPermissions:
+    get:
+      summary: List or query container permissions.
+      description: |
+        This endpoint allows listing ACL information that is attached to containers.
+      parameters:
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: A ListResponse with the requested ContainerPermissions.
+          schema:
+            $ref: '#/definitions/ListResponseOfContainerPermissions'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /ContainerPermissions/{containerPermissionId}:
+    get:
+      summary: Retrieve a single ContainerPermission.
+      description: |
+        This endpoint allows retrieving ACL information that is attached to a container.
+      parameters:
+        - name: containerPermissionId
+          in: path
+          description: The ID of the ContainerPermission to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The requested ContainerPermission.
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /PrivilegedDataPermissions:
+    get:
+      summary: List or query privileged data permissions.
+      description: |
+        This endpoint allows listing ACL information that is attached to privileged data.
+      parameters:
+        - $ref: '#/parameters/startIndex'
+        - $ref: '#/parameters/count'
+        - $ref: '#/parameters/filter'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: A ListResponse with the requested PrivilegedDataPermissions.
+          schema:
+            $ref: '#/definitions/ListResponseOfPrivilegedDataPermissions'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /PrivilegedDataPermissions/{privilegedDataPermissionId}:
+    get:
+      summary: Retrieve a single ContainerPermission.
+      description: |
+        This endpoint allows retrieving ACL information that is attached to privileged data.
+      parameters:
+        - name: privilegedDataPermissionId
+          in: path
+          description: The ID of the PrivilegedDataPermission to retrieve
+          required: true
+          type: number
+          format: integer
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The requested PrivilegedDataPermission.
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
         default:
           description: Unexpected error
           schema:
@@ -396,6 +486,122 @@ definitions:
       type:
         type: string
         description: The type of PrivilegedData.  The value will be dependent on what is supported by the PAM system.  Examples include 'credential', 'ssh key', 'file', etc...
+
+  ListResponseOfContainerPermissions:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/ContainerPermission'
+
+  ContainerPermission:
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the ContainerPermission.
+      container:
+        type: object
+        description: The container that these permissions apply to.  This is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the container that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the container that these permissions apply to.
+      user:
+        type: object
+        description: The User that these permissions apply to.  Either this or group is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the user that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the user that these permissions apply to.
+      group:
+        type: object
+        description: The Group that these permissions apply to.  Either this or user is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the group that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the group that these permissions apply to.
+      rights:
+        type: array
+        description: The rights that the user or group has on this container.
+        items:
+          type: string
+
+  ListResponseOfPrivilegedDataPermissions:
+    type: object
+    properties:
+      totalResults:
+        type: integer
+        description: TODO
+      startIndex:
+        type: integer
+        description: TODO
+      itemsPerPage:
+        type: integer
+        description: TODO
+      Resources:
+        type: array
+        items:
+          $ref: '#/definitions/PrivilegedDataPermission'
+
+  PrivilegedDataPermission:
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the PrivilegedDataPermission.
+      privilegedData:
+        type: object
+        description: The privileged data that these permissions apply to.  This is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the PrivilegedData that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the PrivilegedData that these permissions apply to.
+      user:
+        type: object
+        description: The User that these permissions apply to.  Either this or group is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the user that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the user that these permissions apply to.
+      group:
+        type: object
+        description: The Group that these permissions apply to.  Either this or user is required.
+        properties:
+          value:
+            type: string
+            description: The ID of the group that these permissions apply to.
+          '$ref':
+            type: string
+            description: A URI reference to the group that these permissions apply to.
+      rights:
+        type: array
+        description: The rights that the user or group has on this privileged data.
+        items:
+          type: string
 
   Error:
     type: object
