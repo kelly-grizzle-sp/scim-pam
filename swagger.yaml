@@ -326,13 +326,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
@@ -343,10 +343,67 @@ definitions:
     properties:
       id:
         type: string
-        description: TODO
+        description: The unique identifier of the user.
       userName:
         type: string
-        description: TODO
+        description: A service provider's unique identifier for the user, typically used by the user to directly authenticate to the service provider.
+      name:
+        type: object
+        description: The components of the user's name.
+        properties:
+          formatted:
+            type: string
+            description: The full name, including all middle names, titles, and suffixes as appropriate, formatted for display.
+          familyName:
+            type: string
+            description: The family name of the User, or last name in most Western languages
+          givenName:
+            type: string
+            description: The given name of the User, or first name in most Western languages
+          middleName:
+            type: string
+            description: The middle name(s) of the User
+          honorificPrefix:
+            type: string
+            description: The honorific prefix(es) of the User, or title in most Western languages
+          honorificSuffix:
+            type: string
+            description: The honorific suffix(es) of the User, or suffix in most Western languagestm
+      displayName:
+        type: string
+        description: The name of the user, suitable for display to end-users.
+      active:
+        type: boolean
+        description: A Boolean value indicating the user's administrative status.
+      emails:
+        type: array
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The email address
+            type:
+              type: string
+              description: The type of email address (eg - home, work, etc...)
+            primary:
+              type: boolean
+              description: A boolean indicating that this is the primary address to use for email communication
+      groups:
+        type: array
+        description: A list of groups to which the user belongs, either through direct membership, through nested groups, or dynamically calculated.  This attribute is read-only.  Group membership MUST be modified by adding / removing the user to / from the group.
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The ID of the group
+            '$ref':
+              type: string
+              description: A URI reference to the group
+            'type':
+              type: string
+              description: The method that the group membership was acquired. Either 'direct' or 'indirect' depending on whether the group is inherited or not.
       'urn:ietf:params:scim:schemas:pam:1.0:LinkedObject':
         type: object
         properties:
@@ -362,13 +419,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
@@ -398,13 +455,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
@@ -459,13 +516,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
@@ -492,13 +549,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
@@ -550,13 +607,13 @@ definitions:
     properties:
       totalResults:
         type: integer
-        description: TODO
+        description: The total number of results in the list.  This may be greater than itemsPerPage.
       startIndex:
         type: integer
-        description: TODO
+        description: The 1-based index of the first query result.
       itemsPerPage:
         type: integer
-        description: TODO
+        description: The maximum number of results to return.
       Resources:
         type: array
         items:
