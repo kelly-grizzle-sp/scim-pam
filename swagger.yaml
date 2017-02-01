@@ -115,27 +115,25 @@ paths:
               active: true
               groups:
                 - value: e9e30dba-f08f-4109-8486-d5c6a331660a
-                  $ref: https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a
+                  '$ref': https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a
                   display: Tour Guides
                   type: direct
                 - value: fc348aa8-3835-40eb-a20b-c726e15c55b5
-                  $ref: https://example.com/v2/Groups/fc348aa8-3835-40eb-a20b-c726e15c55b5
+                  '$ref': https://example.com/v2/Groups/fc348aa8-3835-40eb-a20b-c726e15c55b5
                   display: Employees
                   type: indirect
               "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject":
                 source: Corporate Active Directory
                 nativeIdentifier: cn=Barbara Jensen,ou=Users,dc=example,dc=com
               meta:
-                resourceType: User,
-                created: 2010-01-23T04:56:22Z,
-                lastModified: 2011-05-13T04:42:34Z,
+                resourceType: User
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
                 location: https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-
-#TODO: examples
 
   /Groups:
     get:
@@ -177,6 +175,25 @@ paths:
           description: The requested Group.
           schema:
             $ref: '#/definitions/Group'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:core:2.0:Group
+                - urn:ietf:params:scim:schemas:pam:1.0:LinkedObject
+              id: e9e30dba-f08f-4109-8486-d5c6a331660a
+              displayName: Tour Guides
+              members:
+                - value: 2819c223-7f76-453a-919d-413861904646
+                  '$ref': https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
+                  display: Babs Jensen
+              "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject":
+                source: Corporate Active Directory
+                nativeIdentifier: cn=Tour Guides,ou=Groups,dc=example,dc=com
+              meta:
+                resourceType: Group
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
+                location: https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a
         default:
           description: Unexpected error
           schema:
@@ -222,6 +239,31 @@ paths:
           description: The requested Container.
           schema:
             $ref: '#/definitions/Container'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:pam:1.0:Container
+              id: ab8e901-883f-4109-8486-bab810943d93e
+              name: prodDBAAccounts
+              displayName: Production DBA Accounts
+              description: This contains all DBA accounts for the production environment.
+              type: safe
+              owner:
+                value: 2819c223-7f76-453a-919d-413861904646
+                '$ref': https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
+                display: Babs Jensen
+              privilegedData:
+                - value: d973b5-8834f-1784-8734-caf833e9b3efa
+                  '$ref': https://example.com/v2/Containers/d973b5-8834f-1784-8734-caf833e9b3efa
+                  display: root @ Oracle Financials Warehouse
+                - value: d249e9-92759-7883-88723-fa390734beba
+                  '$ref': https://example.com/v2/Containers/d249e9-92759-7883-88723-fa390734beba
+                  display: root @ Enterprise Purchase Ordering
+              meta:
+                resourceType: Container
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
+                location: https://example.com/v2/Container/ab8e901-883f-4109-8486-bab810943d93e
         default:
           description: Unexpected error
           schema:
@@ -267,6 +309,19 @@ paths:
           description: The requested PrivilegedData.
           schema:
             $ref: '#/definitions/PrivilegedData'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData
+              id: d973b5-8834f-1784-8734-caf833e9b3efa
+              name: root @ Oracle Financials Warehouse
+              description: Full access to the Oracle Financials Warehouse database.
+              type: credential
+              meta:
+                resourceType: PrivilegedData
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
+                location: https://example.com/v2/PrivilegedData/d973b5-8834f-1784-8734-caf833e9b3efa
         default:
           description: Unexpected error
           schema:
@@ -312,6 +367,28 @@ paths:
           description: The requested ContainerPermission.
           schema:
             $ref: '#/definitions/ContainerPermission'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission
+              id: c387432-78823-87234-7832-93c9ae93745e
+              container:
+                value: ab8e901-883f-4109-8486-bab810943d93e
+                '$ref': https://example.com/v2/Containers/ab8e901-883f-4109-8486-bab810943d93e
+                display: Production DBA Accounts
+              user:
+                value: 2819c223-7f76-453a-919d-413861904646
+                '$ref': https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
+                display: Babs Jensen
+              rights:
+                - Connect
+                - List Accounts
+                - View Password
+              meta:
+                resourceType: ContainerPermission
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
+                location: https://example.com/v2/ContainerPermissions/c387432-78823-87234-7832-93c9ae93745e
         default:
           description: Unexpected error
           schema:
@@ -357,6 +434,27 @@ paths:
           description: The requested PrivilegedDataPermission.
           schema:
             $ref: '#/definitions/PrivilegedDataPermission'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission
+              id: f823414-872344-77381-ab93489d83ea87
+              privilegedData:
+                value: d973b5-8834f-1784-8734-caf833e9b3efa
+                '$ref': https://example.com/v2/PrivilegedData/d973b5-8834f-1784-8734-caf833e9b3efa
+                display: root @ Oracle Financials Warehouse
+              group:
+                value: e9e30dba-f08f-4109-8486-d5c6a331660a
+                '$ref': https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a
+                display: Tour Guides
+              rights:
+                - Connect
+                - View Password
+              meta:
+                resourceType: PrivilegedDataPermission
+                created: 2010-01-23T04:56:22Z
+                lastModified: 2011-05-13T04:42:34Z
+                location: https://example.com/v2/PrivilegedDataPermissions/f823414-872344-77381-ab93489d83ea87
         default:
           description: Unexpected error
           schema:
