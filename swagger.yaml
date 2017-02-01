@@ -91,6 +91,45 @@ paths:
           description: The requested User.
           schema:
             $ref: '#/definitions/User'
+          examples:
+            application/scim+json:
+              schemas:
+                - urn:ietf:params:scim:schemas:core:2.0:User
+                - urn:ietf:params:scim:schemas:pam:1.0:LinkedObject
+              id: 2819c223-7f76-453a-919d-413861904646
+              userName: bjensen
+              name:
+                formatted: Ms. Barbara J Jensen, III
+                givenName: Barbara
+                familyName: Jensen
+                middleName: Jane
+                honorificPrefix: Ms.
+                honorificSuffix: III
+              displayName: Babs Jensen
+              emails:
+                - value: bjensen@example.com
+                  type: work
+                  primary: true
+                - value: babs@jensen.org
+                  type: home
+              active: true
+              groups:
+                - value: e9e30dba-f08f-4109-8486-d5c6a331660a
+                  $ref: https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a
+                  display: Tour Guides
+                  type: direct
+                - value: fc348aa8-3835-40eb-a20b-c726e15c55b5
+                  $ref: https://example.com/v2/Groups/fc348aa8-3835-40eb-a20b-c726e15c55b5
+                  display: Employees
+                  type: indirect
+              "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject":
+                source: Corporate Active Directory
+                nativeIdentifier: cn=Barbara Jensen,ou=Users,dc=example,dc=com
+              meta:
+                resourceType: User,
+                created: 2010-01-23T04:56:22Z,
+                lastModified: 2011-05-13T04:42:34Z,
+                location: https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646
         default:
           description: Unexpected error
           schema:
