@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-grizzle-scim-pam-ext-00" ipr="trust200902">
+  <front>
+    <title abbrev="draft-grizzle-scim-pam-ext-00">SCIM Extension for Privileged Access Management</title>
+
+    <author fullname="Kelly Grizzle" initials="K." role="editor" surname="Grizzle">
+      <organization abbrev="SailPoint">SailPoint</organization>
+      <address>
+        <email>kelly.grizzle@sailpoint.com</email>
+      </address>
+    </author>
+
+    <author fullname="Benjamin Yoder" initials="B." surname="Yoder">
+      <organization abbrev="Thycotic">Thycotic</organization>
+      <address>
+        <email>ben.yoder@thycotic.com</email>
+      </address>
+    </author>
+
+    <author fullname="Philip Lieberman" initials="P." surname="Lieberman">
+      <organization abbrev="Lieberman">Lieberman Software</organization>
+      <address>
+        <email>phil@liebsoft.com</email>
+      </address>
+    </author>
+
+    <date day="2" month="July" year="2017" />
+
+    <abstract>
+      <t>
+        The System for Cross-domain Identity Management (SCIM) specification <xref target="RFC7643" /> provides schemas
+        that represent common identity information about users and groups.  Privileged Access Management (PAM) software
+        typically makes use of common user and group models - as well as defining additional constructs - to provide
+        fine-grained authorization and management for privileged access.
+      </t>
+      <t>
+        This document contains a SCIM 2.0 extension for Privileged Access Management, which includes extensions to
+        the core User and Group objects, and new resource types and schemas for standard privileged access management
+        constructs.  This extension is intended to provide greater interoperability between PAM software and clients,
+        a common language for PAM concepts, and a baseline that can be further extended to support more complex PAM
+        requirements.
+      </t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="overview" title="Overview">
+      <t>
+        Most Privileged Access Management (PAM) software contains external APIs that can be used to manage users,
+        groups, privileged access, and authorization to privileged data.  However, these APIs are not consistent
+        across different software (e.g. - some software uses REST and some uses SOAP), and each API exposes different
+        functionality.  This makes it difficult for a client to externally manage multiple PAM providers.
+      </t>
+      <t>
+        The System for Cross-domain Identity Management (SCIM) specification provides schemas that represent common
+        identity information about users and groups.  Privileged Access Management (PAM) software typically makes use
+        of common user and group models - as well as defining additional constructs - to provide fine-grained
+        authorization and management for privileged access.
+      </t>
+      <t>
+        This document contains a SCIM 2.0 extension for Privileged Access Management, which includes extensions to
+        the core User and Group objects, and new resource types and schemas for standard privileged access management
+        constructs.  This extension is intended to provide greater interoperability between PAM software and clients,
+        a common language for PAM concepts, and a baseline that can be further extended to support more complex PAM
+        requirements.
+      </t>
+      <t>
+        Some providers may not support all of the endpoints or data that is described in this extension.  When this is
+        encountered, the PAM provider can safely treat endpoints or data as optional.
+      </t>
+
+      <section title="Definitions" anchor="defs" toc="default">
+        <t>
+          <list style="hanging">
+            <t hangText="User:">
+              A user account that can be used to access the PAM system to manage or access privileged data.  This user
+              can either exist only in the PAM system or can be an external user that is defined in another system
+              (e.g. - Active Directory or LDAP).
+            </t>
+            <t hangText="Group:">
+              A group of users or other groups that can be used to govern access within the PAM system.  This group
+              can either exist only in the PAM system or can be an external group that is defined in another system
+              (e.g. - Active Directory or LDAP).
+            </t>
+            <t hangText="Container:">
+              A Container is a logical grouping of privileged data (credentials, etc...) that can be used for
+              organizational or operational purposes.  Access control lists (ACLs) can be applied to a container to
+              control which users and groups have permissions to the privileged data in the container.
+            </t>
+            <t hangText="Privileged Data:">
+              Privileged data is secret information that is protected by the PAM system (e.g. - credentials for a
+              privileged account, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does
+              not have to be.  Access control lists (ACLs) can be applied to privileged data to control which users
+              and groups have permissions to the privileged data.  More often, the ACL information is inherited from
+              the container.
+            </t>
+            <t hangText="Access Control List (ACL):">
+              An access control list can be associated with a Container or Privileged Data.  This contains information
+              about which users and groups have access to the Container or Privileged Data, and what rights they have.
+            </t>
+            <t hangText="External Store:">
+              An external store is a system that contains users and groups (e.g. - Active Directory or LDAP) that can
+              be used by a PAM system.  This allows using existing infrastructure and group definitions to provide
+              authorization, authentication, and information within a PAM system.
+            </t>
+          </list>
+        </t>
+      </section>
+
+      <section anchor="rnc" title="Requirements Notation and Conventions">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref target="RFC2119" />
+        .</t>
+
+        <t>Throughout this document, values are quoted to indicate that they are
+        to be taken literally. When using these values in protocol messages, the
+        quotes MUST NOT be used as part of the value.</t>
+      </section>
+    </section>
+
+    <section anchor="core-schema-extensions" title="Core Schema Extensions">
+      <t>
+        In a PAM system, users and groups can either be locally or externally defined.  When local, the user or group
+        exists only on the PAM system.  When external, the user or group is defined in an External Store, and is
+        somehow synchronized into the PAM system.  In this case, the PAM system keeps a record of the external user or
+        group, along with a reference that can be used to correlate the record back to the external store.  To support
+        this, an optional schema extension "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" MAY be added to the
+        User and Group resource types.
+      </t>
+
+      <section anchor="linked-object" title="Linked Object">
+        <t>
+          The "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" schema contains the following attributes.
+
+          <list style="hanging">
+            <t hangText="source">
+              The name of the External Source from which the User or Group came.  If this is a local User or Group,
+              this is null.  Required if nativeIdentifier is non-null.
+            </t>
+            <t hangText="nativeIdentifier">
+              The unique identifier of the User or Group on the External Source (e.g. - an LDAP distinguished name).
+              If this is a local User or Group, this is null.  Required if source is non-null.
+            </t>
+          </list>
+        </t>
+
+        <t>
+          The following is a non-normative example of a User with the LinkedObject extension.
+        </t>
+
+        <figure>
+          <artwork><![CDATA[
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User",
+    "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject"
+  ],
+  "id": "2819c223-7f76-453a-919d-413861904646",
+  "userName": "bjensen",
+  "name": {
+    "formatted": "Ms. Barbara J Jensen, III",
+    "givenName": "Barbara",
+    "familyName": "Jensen",
+    "middleName": "Jane",
+    "honorificPrefix": "Ms.",
+    "honorificSuffix": "III"
+  },
+  "displayName": "Babs Jensen",
+  "emails": [
+    {
+      "value": "bjensen@example.com",
+      "type": "work",
+      "primary": true
+    },
+    {
+      "value": "babs@jensen.org",
+      "type": "home"
+    }
+  ],
+  "active": true,
+  "groups": [
+    {
+      "value": "e9e30dba-f08f-4109-8486-d5c6a331660a",
+      "$ref": "https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a",
+      "display": "Tour Guides",
+      "type": "direct"
+    },
+    {
+      "value": "fc348aa8-3835-40eb-a20b-c726e15c55b5",
+      "$ref": "https://example.com/v2/Groups/fc348aa8-3835-40eb-a20b-c726e15c55b5",
+      "display": "Employees",
+      "type": "indirect"
+    }
+  ],
+  "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject": {
+    "source": "Corporate Active Directory",
+    "nativeIdentifier": "cn=Barbara Jensen,ou=Users,dc=example,dc=com"
+  },
+  "meta": {
+    "resourceType": "User",
+    "created": "2010-01-23 04:56:22 UTC",
+    "lastModified": "2011-05-13 04:42:34 UTC",
+    "location": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646"
+  }
+}
+]]>
+          </artwork>
+        </figure>
+
+        <section anchor="linked-object-groups" title="Considerations for External Groups">
+          <t>
+            Members of external groups are stored and managed on the External Store, and not in the PAM system.  As a
+            result, the User and Group representations returned by the PAM system MAY return empty values for the
+            "groups" and "members" attributes, respectively.  Additionally, the PAM system MAY choose to return an
+            error response with the 400 status code and "invalidSyntax" error type for requests that attempt to
+            modify or create a group with an invalid configuration.  Examples include, but are not limited to:
+
+            <list style="symbols">
+              <t>
+                An external group with any members.
+              </t>
+              <t>
+                An external group with local Users or Groups as members.
+              </t>
+              <t>
+                A local group with external Users or Groups as members.
+              </t> 
+            </list>
+          </t>
+        </section>
+      </section>
+    </section>
+
+    <section anchor="pam-resource-types" title="Additional ResourceTypes and Schemas">
+      <t>
+        PAM systems define additional constructs to provide enhanced authorization, authentication, and management for
+        privileged data.  To support this, the SCIM PAM extension defines additional ResourceTypes and Schemas that MAY
+        be implemented by the service provider.  If implemented, these ResourceTypes SHOULD support all SCIM operations
+        <xref target="RFC7644" />.  All attributes defined in the schemas are optional unless explicitly marked as
+        REQUIRED.
+      </t>
+
+      <section anchor="container" title="Container">
+        <t>
+          A Container is a logical grouping of privileged data that can be used for organizational or operational
+          purposes.
+        </t>
+        <section anchor="container-resource-type" title="Resource Type">
+          <t>
+            The Container ResourceType supports reading and managing containers, and has the following properties.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="Name:">Container</t>
+              <t hangText="Endpoint:">/Containers</t>
+              <t hangText="Schema:">urn:ietf:params:scim:schemas:pam:1.0:Container</t>
+            </list>
+          </t>
+          <section anchor="container-filtering" title="Filtering">
+            <t>
+              Clients may have a reference to the Container name but not the ID.  For this reason, it is RECOMMENDED that
+              service providers implement filtering that allows equality matching on the "name" attribute.  Example (note
+              that escaping has been removed for readability):
+            </t>
+
+            <figure>
+              <artwork><![CDATA[
+GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
+              </artwork>
+            </figure>
+          </section>
+        </section>
+        <section anchor="container-schema" title="Schema">
+          <t>
+            The "urn:ietf:params:scim:schemas:pam:1.0:Container" defines all common attributes for a Container.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="id">The unique identifier of the Container. REQUIRED</t>
+              <t hangText="name">The name of the Container. REQUIRED</t>
+              <t hangText="displayName">The display name of the Container. If null, the name should be used as the display name.</t>
+              <t hangText="description">The description of the Container.</t>
+              <t hangText="type">
+                The type of container. There are no canonical values defined in this draft for type, but service providers MAY
+                choose to define the valid types. Optional if the PAM system does not support multiple types of Containers.
+              </t>
+              <t hangText="owner">
+                A complex attribute that defines the User that is the owner of this Container.  The following sub-attributes
+                are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the User that owns this Container.</t>
+                  <t hangText="$ref">A URI reference to the User that owns this Container.</t>
+                  <t hangText="display">The display name of the user that owns this Container.</t>
+                </list>
+              </t>
+              <t hangText="privilegedData">
+                A multi-valued complex attribute that contains the PrivilegedData that resides in this Container.  Service
+                providers MAY choose to make this attribute have a "returned" value of "request" if the list of privileged
+                data could be very large.  Using this option will prevent this attribute from being returned upon retrieval
+                unless explicitly requested using the "attributes" query parameter.  The following sub-attributes are
+                defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the PrivilegedData.</t>
+                  <t hangText="$ref">A URI reference to the PrivilegedData.</t>
+                  <t hangText="display">The displayable value of the PrivilegedData.</t>
+                  <t hangText="type">The type of the PrivilegedData.</t>
+                </list>
+              </t>
+            </list>
+          </t>
+        </section>
+      </section>
+
+      <section anchor="privileged-data" title="PrivilegedData">
+        <t>
+          Privileged data is secret information that is protected by the PAM system (e.g. - credentials for a privileged
+          account, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.
+        </t>
+        <section anchor="privileged-data-resource-type" title="Resource Type">
+          <t>
+            The PrivilegedData ResourceType supports reading and managing privileged data, and has the following properties.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="Name:">PrivilegedData</t>
+              <t hangText="Endpoint:">/PrivilegedData</t>
+              <t hangText="Schema:">urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData</t>
+            </list>
+          </t>
+        </section>
+        <section anchor="privileged-data-schema" title="Schema">
+          <t>
+            The "urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData" defines all common attributes for a PrivilegedData.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="id">The unique identifier of the PrivilegedData. REQUIRED</t>
+              <t hangText="name">A descriptive name for this piece of PrivilegedData.  For example, root@mylinuxhost. REQUIRED</t>
+              <t hangText="description">A description for this piece of PrivilegedData.</t>
+              <t hangText="type">
+                The type of PrivilegedData.  The value will be dependent on what is supported by the PAM system.  Examples
+                include 'credential', 'ssh key', 'file', etc...
+              </t>
+            </list>
+          </t>
+        </section>
+      </section>
+
+      <section anchor="container-permission" title="ContainerPermission">
+        <t>
+          A ContainerPermission contains authorization information that describes which rights a User or Group has on a
+          Container.  This is a piece of an Access Control List that contains all information about a specific User or
+          Group in relation to a specific Container.  Typically, permissions that are granted on a Container apply to
+          all privileged data that resides in the container.
+        </t>
+        <section anchor="container-permission-resource-type" title="Resource Type">
+          <t>
+            The ContainerPermission ResourceType supports reading and managing permissions that a User or Group have on
+            a Container, and has the following properties.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="Name:">ContainerPermission</t>
+              <t hangText="Endpoint:">/ContainerPermissions</t>
+              <t hangText="Schema:">urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission</t>
+            </list>
+          </t>
+          <section anchor="container-permission-filtering" title="Filtering">
+            <t>
+              It is expected that clients will need to find the permissions on a specific Container that are granted to
+              a specific User or Group.  For this reason, it is RECOMMENDED that service providers implement filtering
+              that allows equality matching on the "container.value", "user.value", and "group.value" attributes.
+              Example (note that escaping has been removed and newlines added for readability):
+            </t>
+
+            <figure>
+              <artwork><![CDATA[
+GET /scim/v2/ContainerPermissions?
+        filter=container.value eq '8729e778-9af6-874c-778a3-783956810384' and
+               user.value eq '2819c223-7f76-453a-919d-413861904646']]>
+              </artwork>
+            </figure>
+          </section>
+        </section>
+        <section anchor="container-permission-data-schema" title="Schema">
+          <t>
+            The "urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission" defines all common attributes for a ContainerPermission.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="id">The unique identifier of the ContainerPermission. REQUIRED</t>
+              <t hangText="container">
+                A complex attribute that references the Container that these permissions apply to.  The following sub-attributes
+                are defined. REQUIRED
+                <list style="hanging">
+                  <t hangText="value">The ID of the Container that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the Container that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="user">
+                A complex attribute that references the User that these permissions apply to.  Either this attribute or "group" is required.
+                The following sub-attributes are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the User that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the User that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="group">
+                A complex attribute that references the Group that these permissions apply to.  Either this attribute or "user" is required.
+                The following sub-attributes are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the Group that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the Group that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="rights">
+                An array of strings that are the names of the rights that the User or Group has on this Container.  There are
+                no canonical values defined for rights, and these will vary between service providers.
+              </t>
+            </list>
+          </t>
+        </section>
+      </section>
+
+      <section anchor="privileged-data-permission" title="PrivilegedDataPermission">
+        <t>
+          A PrivilegedDataPermission contains authorization information that describes which rights a User or Group has on a
+          PrivilegedData.  This is a piece of an Access Control List that contains all information about a specific User or
+          Group in relation to a specific piece of privileged data.  This resource type and schema are OPTIONAL if the
+          service provider does not support permissions on privileged data.
+        </t>
+        <section anchor="privileged-data-permission-resource-type" title="Resource Type">
+          <t>
+            The PrivilegedDataPermission ResourceType supports reading and managing permissions that a User or Group have on
+            a PrivilegedData, and has the following properties.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="Name:">PrivilegedDataPermission</t>
+              <t hangText="Endpoint:">/PrivilegedDataPermissions</t>
+              <t hangText="Schema:">urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission</t>
+            </list>
+          </t>
+          <section anchor="privileged-data-permission-filtering" title="Filtering">
+            <t>
+              It is expected that clients will need to find the permissions on a specific PrivilegedData that are
+              granted to a specific User or Group.  For this reason, it is RECOMMENDED that service providers implement
+              filtering that allows equality matching on the "privilegedData.value", "user.value", and "group.value"
+              attributes.  Example (note that escaping has been removed and newlines added for readability):
+            </t>
+
+            <figure>
+              <artwork><![CDATA[
+GET /scim/v2/PrivilegedDataPermissions?
+        filter=privilegedData.value eq '2746c134-59e8-848a-874d3-782303476812' and
+               user.value eq '2819c223-7f76-453a-919d-413861904646']]>
+              </artwork>
+            </figure>
+          </section>
+        </section>
+        <section anchor="privileged-data-permission-data-schema" title="Schema">
+          <t>
+            The "urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission" defines all common attributes for a PrivilegedDataPermission.
+          </t>
+          <t>
+            <list style="hanging">
+              <t hangText="id">The unique identifier of the PrivilegedDataPermission. REQUIRED</t>
+              <t hangText="container">
+                A complex attribute that references the PrivilegedData that these permissions apply to.  The following sub-attributes
+                are defined. REQUIRED
+                <list style="hanging">
+                  <t hangText="value">The ID of the PrivilegedData that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the PrivilegedData that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="user">
+                A complex attribute that references the User that these permissions apply to.  Either this attribute or "group" is required.
+                The following sub-attributes are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the User that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the User that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="group">
+                A complex attribute that references the Group that these permissions apply to.  Either this attribute or "user" is required.
+                The following sub-attributes are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the Group that these permissions apply to.</t>
+                  <t hangText="$ref">A URI reference to the Group that these permissions apply to.</t>
+                </list>
+              </t>
+              <t hangText="rights">
+                An array of strings that are the names of the rights that the User or Group has on this PrivilegedData.  There are
+                no canonical values defined for rights, and these will vary between service providers.
+              </t>
+            </list>
+          </t>
+        </section>
+      </section>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include="reference.RFC.2119"?>
+      <?rfc include="reference.RFC.7643"?>
+      <?rfc include="reference.RFC.7644"?>
+    </references>
+  </back>
+</rfc>
