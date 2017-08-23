@@ -55,7 +55,7 @@ paths:
     get:
       summary: List or query users.
       description: |
-        The Users endpoint returns information about users in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+        The Users endpoint returns information about users in the PAM system.  These may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).  External users are typically a light-weight version of the user that has minimal information and rely on the external source for the details.  These will include the "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" schema to indicate the name of the source system and the user's native identifier (eg - a DN) on the source system.
       parameters:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
@@ -76,7 +76,7 @@ paths:
     get:
       summary: Retrieve a user.
       description: |
-        This endpoint returns information about a requested user in the PAM system.  This user may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
+        This endpoint returns information about a requested user in the PAM system.  This user may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).  External users are typically a light-weight version of the user that has minimal information and rely on the external source for the details.  These will include the "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" schema to indicate the name of the source system and the user's native identifier (eg - a DN) on the source system.
       parameters:
         - name: userId
           in: path
@@ -652,6 +652,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the user that owns this container.
+          display:
+            type: string
+            description: The display name of the user that owns this container
       privilegedData:
         type: array
         description: The privileged data that resides in this container.
@@ -667,6 +670,9 @@ definitions:
       '$ref':
         type: string
         description: A URI reference to the PrivilegedData.
+      display:
+        type: string
+        description: The displayable value of the PrivilegedData
 
   ListResponseOfPrivilegedData:
     type: object
