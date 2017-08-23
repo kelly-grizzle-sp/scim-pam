@@ -36,7 +36,7 @@
       </address>
     </author>
 
-    <date day="2" month="July" year="2017" />
+    <date day="23" month="August" year="2017" />
 
     <abstract>
       <t>
@@ -157,12 +157,13 @@
           </list>
         </t>
 
-        <t>
-          The following is a non-normative example of a User with the LinkedObject extension.
-        </t>
+        <section anchor="linked-object-example" title="Example">
+          <t>
+            The following is a non-normative example of a User with the LinkedObject extension.
+          </t>
 
-        <figure>
-          <artwork><![CDATA[
+          <figure>
+            <artwork><![CDATA[
 {
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:User",
@@ -217,8 +218,9 @@
   }
 }
 ]]>
-          </artwork>
-        </figure>
+            </artwork>
+          </figure>
+        </section>
 
         <section anchor="linked-object-groups" title="Considerations for External Groups">
           <t>
@@ -294,8 +296,17 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
               <t hangText="displayName">The display name of the Container. If null, the name should be used as the display name.</t>
               <t hangText="description">The description of the Container.</t>
               <t hangText="type">
-                The type of container. There are no canonical values defined in this draft for type, but service providers MAY
-                choose to define the valid types. Optional if the PAM system does not support multiple types of Containers.
+                The type of container. There are no canonical values defined for type, but service providers MAY choose to define
+                the valid types. Optional if the PAM system does not support multiple types of Containers.
+              </t>
+              <t hangText="parent">
+                A complex attribute that defines the parent Container of this Container if the service providers supports
+                hierarchies of containers.  The following sub-attributes are defined.
+                <list style="hanging">
+                  <t hangText="value">The ID of the Container that is the parent of this Container in the hierarchy.</t>
+                  <t hangText="$ref">A URI reference to the Container that is the parent of this Container in the hierarchy.</t>
+                  <t hangText="display">The display name of the Container that is the parent of this Container in the hierarchy.</t>
+                </list>
               </t>
               <t hangText="owner">
                 A complex attribute that defines the User that is the owner of this Container.  The following sub-attributes
@@ -321,6 +332,56 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
               </t>
             </list>
           </t>
+        </section>
+
+        <section anchor="container-example" title="Example">
+          <t>
+            The following is a non-normative example of a Container.
+          </t>
+
+          <figure>
+            <artwork><![CDATA[
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:pam:1.0:Container"
+  ],
+  "id": "ab8e901-883f-4109-8486-bab810943d93e",
+  "name": "prodDBAAccounts",
+  "displayName": "Production DBA Accounts",
+  "description": "This contains all DBA accounts for the production environment.",
+  "type": "safe",
+  "parent": {
+    "value": "78234914-7fb3-828e-7281-87234abe8300",
+    "$ref": "https://example.com/v2/Containers/78234914-7fb3-828e-7281-87234abe8300",
+    "display": "Root Container"
+  },
+  "owner": {
+    "value": "2819c223-7f76-453a-919d-413861904646",
+    "$ref": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646",
+    "display": "Babs Jensen"
+  },
+  "privilegedData": [
+    {
+      "value": "d973b5-8834f-1784-8734-caf833e9b3efa",
+      "$ref": "https://example.com/v2/Containers/d973b5-8834f-1784-8734-caf833e9b3efa",
+      "display": "root @ Oracle Financials Warehouse"
+    },
+    {
+      "value": "d249e9-92759-7883-88723-fa390734beba",
+      "$ref": "https://example.com/v2/Containers/d249e9-92759-7883-88723-fa390734beba",
+      "display": "root @ Enterprise Purchase Ordering"
+    }
+  ],
+  "meta": {
+    "resourceType": "Container",
+    "created": "2010-01-23T04:56:22.000Z",
+    "lastModified": "2011-05-13T04:42:34.000Z",
+    "location": "https://example.com/v2/Container/ab8e901-883f-4109-8486-bab810943d93e"
+  }
+}
+]]>
+            </artwork>
+          </figure>
         </section>
       </section>
 
@@ -356,6 +417,33 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
               </t>
             </list>
           </t>
+        </section>
+
+        <section anchor="privileged-data-example" title="Example">
+          <t>
+            The following is a non-normative example of a PrivilegedData.
+          </t>
+
+          <figure>
+            <artwork><![CDATA[
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData"
+  ],
+  "id": "d973b5-8834f-1784-8734-caf833e9b3efa",
+  "name": "root @ Oracle Financials Warehouse",
+  "description": "Full access to the Oracle Financials Warehouse database.",
+  "type": "credential",
+  "meta": {
+    "resourceType": "PrivilegedData",
+    "created": "2010-01-23T04:56:22.000Z",
+    "lastModified": "2011-05-13T04:42:34.000Z",
+    "location": "https://example.com/v2/PrivilegedData/d973b5-8834f-1784-8734-caf833e9b3efa"
+  }
+}
+]]>
+            </artwork>
+          </figure>
         </section>
       </section>
 
@@ -408,6 +496,8 @@ GET /scim/v2/ContainerPermissions?
                 <list style="hanging">
                   <t hangText="value">The ID of the Container that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the Container that these permissions apply to.</t>
+                  <t hangText="name">The name of the Container that these permissions apply to.</t>
+                  <t hangText="display">The display name of the Container that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="user">
@@ -416,6 +506,7 @@ GET /scim/v2/ContainerPermissions?
                 <list style="hanging">
                   <t hangText="value">The ID of the User that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the User that these permissions apply to.</t>
+                  <t hangText="display">The display name of the User that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="group">
@@ -424,6 +515,7 @@ GET /scim/v2/ContainerPermissions?
                 <list style="hanging">
                   <t hangText="value">The ID of the Group that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the Group that these permissions apply to.</t>
+                  <t hangText="display">The display name of the Group that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="rights">
@@ -432,6 +524,45 @@ GET /scim/v2/ContainerPermissions?
               </t>
             </list>
           </t>
+        </section>
+        <section anchor="container-permission-example" title="Example">
+          <t>
+            The following is a non-normative example of a ContainerPermission.
+          </t>
+
+          <figure>
+            <artwork><![CDATA[
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission"
+  ],
+  "id": "c387432-78823-87234-7832-93c9ae93745e",
+  "container": {
+    "value": "ab8e901-883f-4109-8486-bab810943d93e",
+    "$ref": "https://example.com/v2/Containers/ab8e901-883f-4109-8486-bab810943d93e",
+    "display": "Production DBA Accounts",
+    "name": "prodDBAAccounts"
+  },
+  "user": {
+    "value": "2819c223-7f76-453a-919d-413861904646",
+    "$ref": "https://example.com/v2/Users/2819c223-7f76-453a-919d-413861904646",
+    "display": "Babs Jensen"
+  },
+  "rights": [
+    "Connect",
+    "List Accounts",
+    "View Password"
+  ],
+  "meta": {
+    "resourceType": "ContainerPermission",
+    "created": "2010-01-23T04:56:22.000Z",
+    "lastModified": "2011-05-13T04:42:34.000Z",
+    "location": "https://example.com/v2/ContainerPermissions/c387432-78823-87234-7832-93c9ae93745e"
+  }
+}
+]]>
+            </artwork>
+          </figure>
         </section>
       </section>
 
@@ -478,12 +609,13 @@ GET /scim/v2/PrivilegedDataPermissions?
           <t>
             <list style="hanging">
               <t hangText="id">The unique identifier of the PrivilegedDataPermission. REQUIRED</t>
-              <t hangText="container">
+              <t hangText="privilegedData">
                 A complex attribute that references the PrivilegedData that these permissions apply to.  The following sub-attributes
                 are defined. REQUIRED
                 <list style="hanging">
                   <t hangText="value">The ID of the PrivilegedData that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the PrivilegedData that these permissions apply to.</t>
+                  <t hangText="display">The display name of the PrivilegedData that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="user">
@@ -492,6 +624,7 @@ GET /scim/v2/PrivilegedDataPermissions?
                 <list style="hanging">
                   <t hangText="value">The ID of the User that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the User that these permissions apply to.</t>
+                  <t hangText="display">The display name of the User that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="group">
@@ -500,6 +633,7 @@ GET /scim/v2/PrivilegedDataPermissions?
                 <list style="hanging">
                   <t hangText="value">The ID of the Group that these permissions apply to.</t>
                   <t hangText="$ref">A URI reference to the Group that these permissions apply to.</t>
+                  <t hangText="display">The display name of the Group that these permissions apply to.</t>
                 </list>
               </t>
               <t hangText="rights">
@@ -508,6 +642,43 @@ GET /scim/v2/PrivilegedDataPermissions?
               </t>
             </list>
           </t>
+        </section>
+        <section anchor="privileged-data-permission-example" title="Example">
+          <t>
+            The following is a non-normative example of a PrivilegedDataPermission.
+          </t>
+
+          <figure>
+            <artwork><![CDATA[
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission"
+  ],
+  "id": "f823414-872344-77381-ab93489d83ea87",
+  "privilegedData": {
+    "value": "d973b5-8834f-1784-8734-caf833e9b3efa",
+    "$ref": "https://example.com/v2/PrivilegedData/d973b5-8834f-1784-8734-caf833e9b3efa",
+    "display": "root @ Oracle Financials Warehouse"
+  },
+  "group": {
+    "value": "e9e30dba-f08f-4109-8486-d5c6a331660a",
+    "$ref": "https://example.com/v2/Groups/e9e30dba-f08f-4109-8486-d5c6a331660a",
+    "display": "Tour Guides"
+  },
+  "rights": [
+    "Connect",
+    "View Password"
+  ],
+  "meta": {
+    "resourceType": "PrivilegedDataPermission",
+    "created": "2010-01-23T04:56:22.000Z",
+    "lastModified": "2011-05-13T04:42:34.000Z",
+    "location": "https://example.com/v2/PrivilegedDataPermissions/f823414-872344-77381-ab93489d83ea87"
+  }
+}
+]]>
+            </artwork>
+          </figure>
         </section>
       </section>
     </section>
