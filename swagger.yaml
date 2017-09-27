@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: PAM SCIM Extension
   description: |
-    Privileged Account Management SCIM API extensions that promote integration with identity governance systems.
+    Privileged Access Management SCIM API extensions that promote integration with identity governance systems.
     
     The idea behind this API is to provide a common base for all PAM vendors to build on top of.  This API exposes the objects that are core to privileged account management, but can be extended by vendors that can provide additional information.  In the same way, some vendors may not support all of the endpoints or data that is described in this API.  When this is encountered, the PAM vendor can safely treat endpoints or data as optional.
     
@@ -48,7 +48,30 @@ parameters:
     description: 'A SCIM filter string - see https://tools.ietf.org/html/rfc7644#section-3.4.2.2'
     required: false
     type: string
-#TODO: Add sortBy and sortOrder
+  sortBy:
+    name: sortBy
+    in: query
+    description: The attribute whose value SHALL be used to order the returned responses.
+    required: false
+    type: string
+  sortOrder:
+    name: sortOrder
+    in: query
+    description: The order in which the "sortBy" parameter is applied.  Allowed values are "ascending" and "descending". Defaults to "ascending" if not specified.
+    required: false
+    type: string
+  attributes:
+    name: attributes
+    in: query
+    description: A comma-separated list of resource attribute names to return.
+    required: false
+    type: string
+  excludedAttributes:
+    name: excludedAttributes
+    in: query
+    description: A comma-separated list of resource attribute names to not return.
+    required: false
+    type: string
 
 paths:
   /Users:
@@ -60,6 +83,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Users
       responses:
@@ -71,19 +98,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Create a user.
+      description: Create a new local user in the PAM system.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: user
+          in: body
+          description: The user to create.
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      tags:
+        - Users
+      responses:
+        200:
+          description: The newly created User.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /Users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        description: The ID of the user.
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a user.
       description: |
         This endpoint returns information about a requested user in the PAM system.  This user may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).  External users are typically a light-weight version of the user that has minimal information and rely on the external source for the details.  These will include the "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" schema to indicate the name of the source system and the user's native identifier (eg - a DN) on the source system.
       parameters:
-        - name: userId
-          in: path
-          description: The ID of the user to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Users
       responses:
@@ -134,6 +187,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      summary: Update a user.
+      description: Update a user by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: user
+          in: body
+          description: The user to update.
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      tags:
+        - Users
+      responses:
+        200:
+          description: The updated User.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a user.
+      description: Partially update a user by modifying parts of it.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: user
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Users
+      responses:
+        200:
+          description: The updated User.
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a user.
+      description: Delete a user from the system.
+      tags:
+        - Users
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /Groups:
     get:
@@ -144,6 +255,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Groups
       responses:
@@ -155,19 +270,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Create a group.
+      description: Create a new local group in the PAM system.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: group
+          in: body
+          description: The group to create.
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - Groups
+      responses:
+        200:
+          description: The newly created Group.
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /Groups/{groupId}:
+    parameters:
+      - name: groupId
+        in: path
+        description: The ID of the group
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a group.
       description: |
         This endpoint returns information about a requested group in the PAM system.  This group may be local to the PAM system or be externally defined in another system (eg - in Active Directory or LDAP).
       parameters:
-        - name: groupId
-          in: path
-          description: The ID of the group to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Groups
       responses:
@@ -198,6 +339,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      summary: Update a group.
+      description: Update a group by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: group
+          in: body
+          description: The group to update.
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - Groups
+      responses:
+        200:
+          description: The updated Group.
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a group.
+      description: Partially update a group by modifying parts of it.  Prefer using PATCH over PUT when modifying group membership.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: group
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Groups
+      responses:
+        200:
+          description: The updated Group.
+          schema:
+            $ref: '#/definitions/Group'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a group.
+      description: Delete a group from the system.
+      tags:
+        - Groups
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /Containers:
     get:
@@ -208,6 +407,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Containers
       responses:
@@ -219,19 +422,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Create a container.
+      description: Create a new container.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: container
+          in: body
+          description: The container to create.
+          required: true
+          schema:
+            $ref: '#/definitions/Container'
+      tags:
+        - Containers
+      responses:
+        200:
+          description: The newly created Container.
+          schema:
+            $ref: '#/definitions/Container'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /Container/{containerId}:
+    parameters:
+      - name: containerId
+        in: path
+        description: The ID of the container
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a container.
       description: |
         This endpoint returns information about a requested Container.  A Container is a logical grouping of privileged data (credentials, etc...) that can be used for organizational or operational purposes.  Access control list (ACL) information about which users and groups have permissions on a Container can be obtained through /ContainerPermissions.
       parameters:
-        - name: containerId
-          in: path
-          description: The ID of the container to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Containers
       responses:
@@ -268,6 +497,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      summary: Update a container.
+      description: Update a container by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: container
+          in: body
+          description: The user to container.
+          required: true
+          schema:
+            $ref: '#/definitions/Container'
+      tags:
+        - Containers
+      responses:
+        200:
+          description: The updated Container.
+          schema:
+            $ref: '#/definitions/Container'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a container.
+      description: Partially update a container by modifying parts of it.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: container
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Containers
+      responses:
+        200:
+          description: The updated Container.
+          schema:
+            $ref: '#/definitions/Container'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a container.
+      description: Delete a container from the system.
+      tags:
+        - Containers
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /PrivilegedData:
     get:
@@ -278,6 +565,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Privileged Data
       responses:
@@ -289,19 +580,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Create a privileged data.
+      description: Create a new privileged data.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedData
+          in: body
+          description: The PrivilegedData to create.
+          required: true
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+      tags:
+        - Privileged Data
+      responses:
+        200:
+          description: The newly created PrivilegedData.
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /PrivilegedData/{privilegedDataId}:
+    parameters:
+      - name: privilegedDataId
+        in: path
+        description: The ID of the PrivilegedData
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a single PrivilegedData.
       description: |
         This endpoint returns information about a requested piece of PrivilegedData.  Privileged data is secret information that is protected by the PAM system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored inside of a Container, but does not have to be.  Access control list (ACL) information about which users and groups have permissions on a piece of PrivilegedData can be obtained through /PrivilegedDataPermissions.
       parameters:
-        - name: privilegedDataId
-          in: path
-          description: The ID of the PrivilegedData to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Privileged Data
       responses:
@@ -326,6 +643,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      summary: Update a privileged data.
+      description: Update a privileged data by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedData
+          in: body
+          description: The privileged data to update.
+          required: true
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+      tags:
+        - Privileged Data
+      responses:
+        200:
+          description: The updated PrivilegedData.
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a privileged data.
+      description: Partially update a privileged data by modifying parts of it.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedData
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Privileged Data
+      responses:
+        200:
+          description: The updated PrivilegedData.
+          schema:
+            $ref: '#/definitions/PrivilegedData'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a privileged data.
+      description: Delete a privileged data from the system.
+      tags:
+        - Privileged Data
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /ContainerPermissions:
     get:
@@ -336,6 +711,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Access Control Lists
       responses:
@@ -347,19 +726,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Add permissions to a user on a container.
+      description: Add permissions to a user on a container.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: containerPermission
+          in: body
+          description: The container permission to create.
+          required: true
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The newly created ContainerPermission.
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /ContainerPermissions/{containerPermissionId}:
+    parameters:
+      - name: containerPermissionId
+        in: path
+        description: The ID of the ContainerPermission
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a single ContainerPermission.
       description: |
         This endpoint allows retrieving ACL information that is attached to a container.
       parameters:
-        - name: containerPermissionId
-          in: path
-          description: The ID of the ContainerPermission to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Access Control Lists
       responses:
@@ -393,6 +798,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    put:
+      summary: Update a container permission.
+      description: Update a container permission by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: containerPermission
+          in: body
+          description: The container permission to update.
+          required: true
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The updated ContainerPermission.
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a container permission.
+      description: Partially update a container permission by modifying parts of it.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: containerPermission
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The updated ContainerPermission.
+          schema:
+            $ref: '#/definitions/ContainerPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a container permission.
+      description: Delete a container permission from the system.
+      tags:
+        - Access Control Lists
+      responses:
+        204:
+          description: No content
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /PrivilegedDataPermissions:
     get:
@@ -403,6 +866,10 @@ paths:
         - $ref: '#/parameters/startIndex'
         - $ref: '#/parameters/count'
         - $ref: '#/parameters/filter'
+        - $ref: '#/parameters/sortBy'
+        - $ref: '#/parameters/sortOrder'
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Access Control Lists
       responses:
@@ -414,19 +881,45 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Add permissions to a user on a privileged data.
+      description: Add permissions to a user on a privileged data.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedDataPermission
+          in: body
+          description: The privileged data permission to create.
+          required: true
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The newly created PrivilegedDataPermission.
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /PrivilegedDataPermissions/{privilegedDataPermissionId}:
+    parameters:
+      - name: privilegedDataPermissionId
+        in: path
+        description: The ID of the PrivilegedDataPermission to retrieve
+        required: true
+        type: number
+        format: integer
     get:
       summary: Retrieve a single ContainerPermission.
       description: |
         This endpoint allows retrieving ACL information that is attached to privileged data.
       parameters:
-        - name: privilegedDataPermissionId
-          in: path
-          description: The ID of the PrivilegedDataPermission to retrieve
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
       tags:
         - Access Control Lists
       responses:
@@ -455,6 +948,64 @@ paths:
                 created: 2010-01-23T04:56:22Z
                 lastModified: 2011-05-13T04:42:34Z
                 location: https://example.com/v2/PrivilegedDataPermissions/f823414-872344-77381-ab93489d83ea87
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Update a privileged data permission.
+      description: Update a privileged data permission by fully replacing it on the server with the contents of the request body.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedDataPermission
+          in: body
+          description: The privileged data permission to update.
+          required: true
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The updated PrivilegedDataPermission.
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    patch:
+      summary: Partially update a privileged data permission.
+      description: Partially update a privileged data permission by modifying parts of it.
+      parameters:
+        - $ref: '#/parameters/attributes'
+        - $ref: '#/parameters/excludedAttributes'
+        - name: privilegedDataPermission
+          in: body
+          description: The PATCH operations to execute.
+          required: true
+          schema:
+            $ref: '#/definitions/Patch'
+      tags:
+        - Access Control Lists
+      responses:
+        200:
+          description: The updated PrivilegedDataPermission.
+          schema:
+            $ref: '#/definitions/PrivilegedDataPermission'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a privileged data permission.
+      description: Delete a privileged data permission from the system.
+      tags:
+        - Access Control Lists
+      responses:
+        204:
+          description: No content
         default:
           description: Unexpected error
           schema:
@@ -508,13 +1059,37 @@ definitions:
             description: The honorific prefix(es) of the User, or title in most Western languages
           honorificSuffix:
             type: string
-            description: The honorific suffix(es) of the User, or suffix in most Western languagestm
+            description: The honorific suffix(es) of the User, or suffix in most Western languages
       displayName:
         type: string
         description: The name of the user, suitable for display to end-users.
+      nickName:
+        type: string
+        description: The casual way to address the user in real life.
+      profileUrl:
+        type: string
+        description: A URI that points to a location representing the user's online profile (e.g., a web page).
+      title:
+        type: string
+        description: The user's title, such as "Vice President".
+      userType:
+        type: string
+        description: Used to identify the relationship between the organization and the user.
+      preferredLanguage:
+        type: string
+        description: Indicates the user's preferred written or spoken languages and is generally used for selecting a localized user interface.
+      locale:
+        type: string
+        description: Used to indicate the User's default location for purposes of localizing such items as currency, date time format, or numerical representations.
+      timezone:
+        type: string
+        description: The User's time zone, in IANA Time Zone database format.
       active:
         type: boolean
         description: A Boolean value indicating the user's administrative status.
+      password:
+        type: string
+        description: This attribute is intended to be used as a means to set, replace, or compare (i.e., filter for equality) a password.  The cleartext value or the hashed value of a password SHALL NOT be returnable by a service provider.
       emails:
         type: array
         items:
@@ -529,6 +1104,77 @@ definitions:
             primary:
               type: boolean
               description: A boolean indicating that this is the primary address to use for email communication
+      phoneNumbers:
+        type: array
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The phone number
+            type:
+              type: string
+              description: The type of phone number (eg - home, work, etc...)
+            primary:
+              type: boolean
+              description: A boolean indicating that this is the primary phone number to use for phone communication
+      ims:
+        type: array
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: Instant messaging address for the user.
+            type:
+              type: string
+              description: The type of instant messager (eg - "aim", "gtalk", "icq", "xmpp", "msn", "skype", "qq", "yahoo", or "other")
+            primary:
+              type: boolean
+              description: A boolean indicating that this is the primary IM to use
+      photos:
+        type: array
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: A URI that points to a resource location representing the user's image.
+            type:
+              type: string
+              description: The size of photo (eg - photo or thumbnail)
+            primary:
+              type: boolean
+              description: A boolean indicating that this is the primary photo to use
+      addresses:
+        type: array
+        items:
+          type: object
+          properties:
+            formatted:
+              type: string
+              description: The full mailing address, formatted for display or use with a mailing label.
+            streetAddress:
+              type: string
+              description: The full street address component.
+            locality:
+              type: string
+              description: The city or locality component.
+            region:
+              type: string
+              description: The state or region component.
+            postalCode:
+              type: string
+              description: The zip code or postal code component.
+            country:
+              type: string
+              description: The country name component.  When specified, the value MUST be in ISO 3166-1 "alpha-2" code format
+            type:
+              type: string
+              description: The type of address (eg - work, home, etc...)
+            primary:
+              type: boolean
+              description: A boolean indicating that this is the primary address to use
       groups:
         type: array
         description: A list of groups to which the user belongs, either through direct membership, through nested groups, or dynamically calculated.  This attribute is read-only.  Group membership MUST be modified by adding / removing the user to / from the group.
@@ -547,6 +1193,39 @@ definitions:
             'type':
               type: string
               description: The method that the group membership was acquired. Either 'direct' or 'indirect' depending on whether the group is inherited or not.
+      entitlements:
+        type: array
+        description: A list of entitlements for the user that represent a thing the user has.  No vocabulary or syntax is specified; service providers and clients are expected to encode sufficient information in the value so as to accurately and without ambiguity determine what the user has access to.
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The entitlement
+            'type':
+              type: string
+              description: The type of entitlement
+      roles:
+        type: array
+        description: A list of roles for the user that collectively represent who the user is, e.g., "Student", "Faculty".
+        items:
+          type: object
+          properties:
+            value:
+              type: string
+              description: The role
+            'type':
+              type: string
+              description: The type of role
+      x509Certificates:
+        type: array
+        description: A list of certificates associated with the resource (e.g., a User).  Each value contains exactly one DER-encoded X.509 certificate (see Section 4 of [RFC5280]), which MUST be base64 encoded per Section 4 of [RFC4648].
+        items:
+          type: string
+          properties:
+            value:
+              type: string
+              description: The certificate
       'urn:ietf:params:scim:schemas:pam:1.0:LinkedObject':
         type: object
         properties:
@@ -822,6 +1501,24 @@ definitions:
         description: The rights that the user or group has on this privileged data.
         items:
           type: string
+
+  Patch:
+    type: object
+    properties:
+      Operations:
+        type: array
+        items:
+          type: object
+          properties:
+            op:
+              type: string
+              description: The operation to perform - either "add", "remove", or "replace".
+            path:
+              type: string
+              description: A String containing an attribute path describing the target of the operation.  The "path" attribute is OPTIONAL for "add" and "replace" and is REQUIRED for "remove" operations.
+            value:
+              type: object
+              description: An object with key/value pairs of attributes and values to be added or replaced.
 
   Error:
     type: object
