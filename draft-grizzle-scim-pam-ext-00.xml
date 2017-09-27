@@ -29,6 +29,13 @@
       </address>
     </author>
 
+    <author fullname="Jason Jones" initials="J." surname="Jones">
+      <organization abbrev="Bomgar">Bomgar</organization>
+      <address>
+        <email>jjones@bomgar.com</email>
+      </address>
+    </author>
+
     <author fullname="Philip Lieberman" initials="P." surname="Lieberman">
       <organization abbrev="Lieberman">Lieberman Software</organization>
       <address>
@@ -36,7 +43,7 @@
       </address>
     </author>
 
-    <date day="23" month="August" year="2017" />
+    <date day="27" month="September" year="2017" />
 
     <abstract>
       <t>
@@ -47,7 +54,7 @@
       </t>
       <t>
         This document contains a SCIM 2.0 extension for Privileged Access Management, which includes extensions to
-        the core User and Group objects, and new resource types and schemas for standard privileged access management
+        the core User and Group objects, and new resource types and schemas for standard Privileged Access Management
         constructs.  This extension is intended to provide greater interoperability between PAM software and clients,
         a common language for PAM concepts, and a baseline that can be further extended to support more complex PAM
         requirements.
@@ -71,7 +78,7 @@
       </t>
       <t>
         This document contains a SCIM 2.0 extension for Privileged Access Management, which includes extensions to
-        the core User and Group objects, and new resource types and schemas for standard privileged access management
+        the core User and Group objects, and new resource types and schemas for standard Privileged Access Management
         constructs.  This extension is intended to provide greater interoperability between PAM software and clients,
         a common language for PAM concepts, and a baseline that can be further extended to support more complex PAM
         requirements.
@@ -300,7 +307,7 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
                 the valid types. Optional if the PAM system does not support multiple types of Containers.
               </t>
               <t hangText="parent">
-                A complex attribute that defines the parent Container of this Container if the service providers supports
+                A complex attribute that defines the parent Container of this Container if the service provider supports
                 hierarchies of containers.  The following sub-attributes are defined.
                 <list style="hanging">
                   <t hangText="value">The ID of the Container that is the parent of this Container in the hierarchy.</t>
@@ -364,12 +371,14 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
     {
       "value": "d973b5-8834f-1784-8734-caf833e9b3efa",
       "$ref": "https://example.com/v2/Containers/d973b5-8834f-1784-8734-caf833e9b3efa",
-      "display": "root @ Oracle Financials Warehouse"
+      "display": "root @ Oracle Financials Warehouse",
+      "type": "credential"
     },
     {
       "value": "d249e9-92759-7883-88723-fa390734beba",
       "$ref": "https://example.com/v2/Containers/d249e9-92759-7883-88723-fa390734beba",
-      "display": "root @ Enterprise Purchase Ordering"
+      "display": "root @ Enterprise Purchase Ordering",
+      "type": "credential"
     }
   ],
   "meta": {
