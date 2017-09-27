@@ -1321,9 +1321,22 @@ definitions:
       type:
         type: string
         description: The type of container (eg - management set or account store).  This is optional if the PAM system does not support multiple types of containers.
+      parent:
+        type: object
+        description: A complex attribute that defines the parent Container of this Container if the service provider supports hierarchies of containers. The following sub-attributes are defined.
+        properties:
+          value:
+            type: string
+            description: The ID of the Container that is the parent of this Container in the hierarchy.
+          '$ref':
+            type: string
+            description: A URI reference to the Container that is the parent of this Container in the hierarchy.
+          display:
+            type: string
+            description: The display name of the Container that is the parent of this Container in the hierarchy.
       owner:
         type: object
-        description: The user that owns this container. TODO ... Can this be a group?  TODO ... can there be multiple??
+        description: The user that owns this container.
         properties:
           value:
             type: string
@@ -1351,7 +1364,10 @@ definitions:
         description: A URI reference to the PrivilegedData.
       display:
         type: string
-        description: The displayable value of the PrivilegedData
+        description: The displayable value of the PrivilegedData.
+      type:
+        type: string
+        description: The type of the privileged data.
 
   ListResponseOfPrivilegedData:
     type: object
@@ -1418,6 +1434,12 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the container that these permissions apply to.
+          name:
+            type: string
+            description: The name of the Container these permissions apply to.
+          display:
+            type: string
+            description: The display name of the Container that these permissions apply to.
       user:
         type: object
         description: The User that these permissions apply to.  Either this or group is required.
@@ -1428,6 +1450,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the user that these permissions apply to.
+          display:
+            type: string
+            description: The display name of the User that these permissions apply to.
       group:
         type: object
         description: The Group that these permissions apply to.  Either this or user is required.
@@ -1438,6 +1463,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the group that these permissions apply to.
+          display:
+            type: string
+            description: The display name of the Group that these permissions apply to.
       rights:
         type: array
         description: The rights that the user or group has on this container.
@@ -1476,6 +1504,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the PrivilegedData that these permissions apply to.
+          display:
+            type: string
+            description: The display name of the PrivilegedData that these permissions apply to.
       user:
         type: object
         description: The User that these permissions apply to.  Either this or group is required.
@@ -1486,6 +1517,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the user that these permissions apply to.
+          display:
+            type: string
+            description: The display name of the User that these permissions apply to.
       group:
         type: object
         description: The Group that these permissions apply to.  Either this or user is required.
@@ -1496,6 +1530,9 @@ definitions:
           '$ref':
             type: string
             description: A URI reference to the group that these permissions apply to.
+          display:
+            type: string
+            description: The display name of the Group that these permissions apply to.
       rights:
         type: array
         description: The rights that the user or group has on this privileged data.
