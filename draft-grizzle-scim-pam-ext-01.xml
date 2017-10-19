@@ -11,9 +11,9 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-grizzle-scim-pam-ext-00" ipr="trust200902">
+<rfc category="std" docName="draft-grizzle-scim-pam-ext-01" ipr="trust200902">
   <front>
-    <title abbrev="draft-grizzle-scim-pam-ext-00">SCIM Extension for Privileged Access Management</title>
+    <title abbrev="draft-grizzle-scim-pam-ext-01">SCIM Extension for Privileged Access Management</title>
 
     <author fullname="Kelly Grizzle" initials="K." role="editor" surname="Grizzle">
       <organization abbrev="SailPoint">SailPoint</organization>
@@ -43,7 +43,14 @@
       </address>
     </author>
 
-    <date day="27" month="September" year="2017" />
+    <author fullname="Edward Nunez" initials="E." surname="Nunez">
+      <organization abbrev="Cyberark">CyberArk</organization>
+      <address>
+        <email>Edward.Nunez@cyberark.com</email>
+      </address>
+    </author>
+
+    <date day="18" month="October" year="2017" />
 
     <abstract>
       <t>
@@ -84,7 +91,7 @@
         requirements.
       </t>
       <t>
-        Some providers may not support all of the endpoints or data that is described in this extension.  When this is
+        Some providers MAY not support all of the endpoints or data that is described in this extension.  When this is
         encountered, the PAM provider can safely treat endpoints or data as optional.
       </t>
 
@@ -118,7 +125,7 @@
               about which users and groups have access to the Container or Privileged Data, and what rights they have.
             </t>
             <t hangText="External Store:">
-              An external store is a system that contains users and groups (e.g. - Active Directory or LDAP) that can
+              An External Store is a system that contains users and groups (e.g. - Active Directory or LDAP) that can
               be used by a PAM system.  This allows using existing infrastructure and group definitions to provide
               authorization, authentication, and information within a PAM system.
             </t>
@@ -143,8 +150,8 @@
         In a PAM system, users and groups can either be locally or externally defined.  When local, the user or group
         exists only on the PAM system.  When external, the user or group is defined in an External Store, and is
         somehow synchronized into the PAM system.  In this case, the PAM system keeps a record of the external user or
-        group, along with a reference that can be used to correlate the record back to the external store.  To support
-        this, an optional schema extension "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" MAY be added to the
+        group, along with a reference that can be used to correlate the record back to the External Store.  To support
+        this, an optional schema extension "urn:ietf:params:scim:schemas:pam:1.0:LinkedObject" SHOULD be added to the
         User and Group resource types.
       </t>
 
@@ -280,7 +287,7 @@
           </t>
           <section anchor="container-filtering" title="Filtering">
             <t>
-              Clients may have a reference to the Container name but not the ID.  For this reason, it is RECOMMENDED that
+              Clients MAY have a reference to the Container name but not the ID.  For this reason, it is RECOMMENDED that
               service providers implement filtering that allows equality matching on the "name" attribute.  Example (note
               that escaping has been removed for readability):
             </t>
@@ -300,11 +307,11 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
             <list style="hanging">
               <t hangText="id">The unique identifier of the Container. REQUIRED</t>
               <t hangText="name">The name of the Container. REQUIRED</t>
-              <t hangText="displayName">The display name of the Container. If null, the name should be used as the display name.</t>
-              <t hangText="description">The description of the Container.</t>
+              <t hangText="displayName">The display name of the Container. OPTIONAL. If displayName is unassigned, the name MAY be used as the display name.</t>
+              <t hangText="description">The description of the Container. OPTIONAL</t>
               <t hangText="type">
                 The type of container. There are no canonical values defined for type, but service providers MAY choose to define
-                the valid types. Optional if the PAM system does not support multiple types of Containers.
+                the valid types. OPTIONAL if the PAM system does not support multiple types of Containers.
               </t>
               <t hangText="parent">
                 A complex attribute that defines the parent Container of this Container if the service provider supports
@@ -316,7 +323,7 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
                 </list>
               </t>
               <t hangText="owner">
-                A complex attribute that defines the User that is the owner of this Container.  The following sub-attributes
+                A complex attribute that defines the User that is the owner of this Container.  OPTIONAL.  The following sub-attributes
                 are defined.
                 <list style="hanging">
                   <t hangText="value">The ID of the User that owns this Container.</t>
@@ -370,13 +377,13 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
   "privilegedData": [
     {
       "value": "d973b5-8834f-1784-8734-caf833e9b3efa",
-      "$ref": "https://example.com/v2/Containers/d973b5-8834f-1784-8734-caf833e9b3efa",
+      "$ref": "https://example.com/v2/PrivilegedData/d973b5-8834f-1784-8734-caf833e9b3efa",
       "display": "root @ Oracle Financials Warehouse",
       "type": "credential"
     },
     {
       "value": "d249e9-92759-7883-88723-fa390734beba",
-      "$ref": "https://example.com/v2/Containers/d249e9-92759-7883-88723-fa390734beba",
+      "$ref": "https://example.com/v2/PrivilegedData/d249e9-92759-7883-88723-fa390734beba",
       "display": "root @ Enterprise Purchase Ordering",
       "type": "credential"
     }
@@ -422,7 +429,7 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
               <t hangText="description">A description for this piece of PrivilegedData.</t>
               <t hangText="type">
                 The type of PrivilegedData.  The value will be dependent on what is supported by the PAM system.  Examples
-                include 'credential', 'ssh key', 'file', etc...
+                include 'credential', 'ssh key', 'file', etc...  OPTIONAL.
               </t>
             </list>
           </t>
@@ -477,14 +484,21 @@ GET /scim/v2/Containers?filter=name eq 'Admin Accounts']]>
           </t>
           <section anchor="container-permission-filtering" title="Filtering">
             <t>
-              It is expected that clients will need to find the permissions on a specific Container that are granted to
-              a specific User or Group.  For this reason, it is RECOMMENDED that service providers implement filtering
-              that allows equality matching on the "container.value", "user.value", and "group.value" attributes.
-              Example (note that escaping has been removed and newlines added for readability):
+              It is expected that clients will need to find the all permissions on a specific Container, permissions
+              that are granted to a specific User or Group, or permissions for a specific user or group on a specific
+              container.  For this reason, it is RECOMMENDED that service providers implement filtering that allows
+              equality matching on the "container.value", "user.value", and "group.value" attributes. Example (note
+              that escaping has been removed and newlines added for readability):
             </t>
 
             <figure>
               <artwork><![CDATA[
+GET /scim/v2/ContainerPermissions?
+        filter=container.value eq '8729e778-9af6-874c-778a3-783956810384'
+
+GET /scim/v2/ContainerPermissions?
+        filter=user.value eq '2819c223-7f76-453a-919d-413861904646'
+
 GET /scim/v2/ContainerPermissions?
         filter=container.value eq '8729e778-9af6-874c-778a3-783956810384' and
                user.value eq '2819c223-7f76-453a-919d-413861904646']]>
@@ -579,8 +593,10 @@ GET /scim/v2/ContainerPermissions?
         <t>
           A PrivilegedDataPermission contains authorization information that describes which rights a User or Group has on a
           PrivilegedData.  This is a piece of an Access Control List that contains all information about a specific User or
-          Group in relation to a specific piece of privileged data.  This resource type and schema are OPTIONAL if the
-          service provider does not support permissions on privileged data.
+          Group in relation to a specific piece of privileged data.  This resource MUST only return permissions that are
+          granted directly to the PrivilegedData.  Permissions that are inherited from a Container on the PrivilegedData
+          MUST NOT be returned.  This resource type and schema are OPTIONAL if the service provider does not support
+          permissions on privileged data.
         </t>
         <section anchor="privileged-data-permission-resource-type" title="Resource Type">
           <t>
@@ -596,14 +612,21 @@ GET /scim/v2/ContainerPermissions?
           </t>
           <section anchor="privileged-data-permission-filtering" title="Filtering">
             <t>
-              It is expected that clients will need to find the permissions on a specific PrivilegedData that are
-              granted to a specific User or Group.  For this reason, it is RECOMMENDED that service providers implement
-              filtering that allows equality matching on the "privilegedData.value", "user.value", and "group.value"
-              attributes.  Example (note that escaping has been removed and newlines added for readability):
+              It is expected that clients will need to find the all permissions on a specific PrivilegedData, permissions
+              that are granted to a specific User or Group, or permissions for a specific user or group on a specific
+              privileged data item.  For this reason, it is RECOMMENDED that service providers implement filtering that
+              allows equality matching on the "privilegedData.value", "user.value", and "group.value" attributes.
+              Example (note that escaping has been removed and newlines added for readability):
             </t>
 
             <figure>
               <artwork><![CDATA[
+GET /scim/v2/PrivilegedDataPermissions?
+        filter=privilegedData.value eq '2746c134-59e8-848a-874d3-782303476812'
+
+GET /scim/v2/PrivilegedDataPermissions?
+        filter=user.value eq '2819c223-7f76-453a-919d-413861904646'
+
 GET /scim/v2/PrivilegedDataPermissions?
         filter=privilegedData.value eq '2746c134-59e8-848a-874d3-782303476812' and
                user.value eq '2819c223-7f76-453a-919d-413861904646']]>
@@ -690,6 +713,642 @@ GET /scim/v2/PrivilegedDataPermissions?
           </figure>
         </section>
       </section>
+    </section>
+
+    <section anchor="schema_representation" title="Schema JSON Representations">
+      <t>
+        The following section provide representations of schemas for the schema extensions and new schemas
+        introduced in this document.
+      </t>
+
+      <figure>
+        <artwork><![CDATA[
+{
+  "id":"urn:ietf:params:scim:schemas:pam:1.0:LinkedObject",
+  "name":"Linked Object",
+  "description":"A LinkedObject contains information about the source that an object
+    came from. For example, a User or Group that comes from an external AD.",
+  "attributes":[
+    {
+      "name":"source",
+      "type":"string",
+      "multiValued":false,
+      "description":"The name of the external application on which the object lives.
+        If this is a PAM local object, this is null.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"nativeIdentifier",
+      "type":"string",
+      "multiValued":false,
+      "description":"The native identifier of the object on the external application
+        (eg - the LDAP DN).  If this is a PAM local object, this is null.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    }
+  ]
+},
+{
+  "id":"urn:ietf:params:scim:schemas:pam:1.0:Container",
+  "name":"Container",
+  "description":"A Container is a logical grouping of privileged data (credentials,
+    etc...) that can be used for organizational or operational purposes.",
+  "attributes":[
+    {
+      "name":"id",
+      "type":"string",
+      "multiValued":false,
+      "description":"The unique identifier of the Container",
+      "required":false,
+      "caseExact":true,
+      "mutability":"readOnly",
+      "returned":"always",
+      "uniqueness":"server"
+    },
+    {
+      "name":"name",
+      "type":"string",
+      "multiValued":false,
+      "description":"The name of the container.",
+      "required":true,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"server"
+    },
+    {
+      "name":"displayName",
+      "type":"string",
+      "multiValued":false,
+      "description":"The display name of the container.  This is optional.  If null,
+        the name will be used as the display name.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"description",
+      "type":"string",
+      "multiValued":false,
+      "description":"The description of the container.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"type",
+      "type":"string",
+      "multiValued":false,
+      "description":"The type of container (eg - management set or account store).
+        This is optional if the PAM system does not support multiple types of
+        containers.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"owner",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The user that owns this container.",
+      "mutability":"readWrite",
+      "required":false,
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the user that owns this container",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "User"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the user that owns this container.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the user that owns this container",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"privilegedData",
+      "type":"complex",
+      "multiValued":true,
+      "description":"The privileged data that resides in this container.",
+      "required":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the privileged data.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "User"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the PrivilegedData",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The displayable value of the PrivilegedData",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"type",
+          "type":"string",
+          "multiValued":false,
+          "description":"The type of the PrivilegedData.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    }
+  ]
+},
+{
+  "id":"urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData",
+  "name":"Privileged Data",
+  "description":"Privileged data is secret information that is protected by the PAM
+    system (eg - a credential, an SSH key, etc...).  Privileged data MAY be stored
+    inside of a Container, but does not have to be.",
+  "attributes":[
+    {
+      "name":"id",
+      "type":"string",
+      "multiValued":false,
+      "description":"The unique identifier of the PrivilegedData.",
+      "required":false,
+      "caseExact":true,
+      "mutability":"readOnly",
+      "returned":"always",
+      "uniqueness":"server"
+    },
+    {
+      "name":"name",
+      "type":"string",
+      "multiValued":false,
+      "description":"A descriptive name for this piece of PrivilegedData.
+        For example, root@mylinuxhost",
+      "required":true,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"description",
+      "type":"string",
+      "multiValued":false,
+      "description":"A description for this piece of PrivilegedData.",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    },
+    {
+      "name":"type",
+      "type":"string",
+      "multiValued":false,
+      "description":"The type of PrivilegedData.  The value will be dependent on what
+        is supported by the PAM system.  Examples include 'credential', 'ssh key',
+        'file', etc...",
+      "required":false,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    }
+  ]
+},
+{
+  "id":"urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission",
+  "name":"Container Permission",
+  "description":"ACL information that is attached to a container.",
+  "attributes":[
+    {
+      "name":"id",
+      "type":"string",
+      "multiValued":false,
+      "description":"The unique identifier of the ContainerPermission.",
+      "required":false,
+      "caseExact":true,
+      "mutability":"readOnly",
+      "returned":"always",
+      "uniqueness":"server"
+    },
+    {
+      "name":"container",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The container that these permissions apply to. REQUIRED",
+      "required":true,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the container that these permissions apply to.",
+          "required":true,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "Container"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the container that these permissions apply to.",
+          "required":true,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the container",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"name",
+          "type":"string",
+          "multiValued":false,
+          "description":"The name of the container",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"user",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The User that these permissions apply to.  Either this or group
+        is required.",
+      "required":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the user that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "User"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the user that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the user",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"group",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The Group that these permissions apply to.  Either this or user
+        is required.",
+      "required":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the group that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "Group"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the group that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the group",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"rights",
+      "type":"string",
+      "multiValued":true,
+      "description":"The rights that the user or group has on this container.",
+      "required":true,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    }
+  ]
+},
+{
+  "id":"urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission",
+  "name":"Privileged Data Permission",
+  "description":"ACL information that is attached to privileged data.",
+  "attributes":[
+    {
+      "name":"id",
+      "type":"string",
+      "multiValued":false,
+      "description":"The unique identifier of the PrivilegedDataPermission.",
+      "required":false,
+      "caseExact":true,
+      "mutability":"readOnly",
+      "returned":"always",
+      "uniqueness":"server"
+    },
+    {
+      "name":"privilegedData",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The PrivilegedData that these permissions apply to. REQUIRED",
+      "required":true,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the PrivilegedData that these permissions apply to.",
+          "required":true,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "PrivilegedData"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the PrivilegedData that these permissions
+            apply to.",
+          "required":true,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display value of the PrivilegedData",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"user",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The User that these permissions apply to.  Either this or group
+        is required.",
+      "required":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the user that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "User"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the user that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the user",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"group",
+      "type":"complex",
+      "multiValued":false,
+      "description":"The Group that these permissions apply to.  Either this or user
+        is required.",
+      "required":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none",
+      "subAttributes":[
+        {
+          "name":"value",
+          "type":"string",
+          "multiValued":false,
+          "description":"The ID of the group that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"$ref",
+          "type":"reference",
+          "referenceTypes":[
+            "Group"
+          ],
+          "multiValued":false,
+          "description":"A URI reference to the group that these permissions apply to.",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readWrite",
+          "returned":"default",
+          "uniqueness":"none"
+        },
+        {
+          "name":"display",
+          "type":"string",
+          "multiValued":false,
+          "description":"The display name of the group",
+          "required":false,
+          "caseExact":false,
+          "mutability":"readOnly",
+          "returned":"default",
+          "uniqueness":"none"
+        }
+      ]
+    },
+    {
+      "name":"rights",
+      "type":"string",
+      "multiValued":true,
+      "description":"The rights that the user or group has on this privileged data.",
+      "required":true,
+      "caseExact":false,
+      "mutability":"readWrite",
+      "returned":"default",
+      "uniqueness":"none"
+    }
+  ]
+}
+        ]]>
+        </artwork>
+      </figure>
     </section>
   </middle>
 
